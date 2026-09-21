@@ -79,3 +79,38 @@ test('minimum version in range tests', (t) => {
   })
   t.end()
 })
+
+test('minVersion explain reports blockers when unsatisfiable', (t) => {
+  const minVersionExplain = require('../../ranges/min-version')
+  const ok = minVersionExplain.explain('^1.2.3')
+  t.equal(ok.version.version, '1.2.3')
+  t.same(ok.blockers, [])
+
+  const blocked = minVersionExplain.explain('>4 <3')
+  t.equal(blocked.version, null)
+  t.ok(blocked.blockers.length > 0, 'reports at least one blocker')
+  const blocker = blocked.blockers[0]
+  t.equal(blocker.comparator, '<3.0.0-0')
+  t.same(blocker.tuple, [3, 0, 0], 'reports the tuple where it blocks')
+
+  const eqConflict = minVersionExplain.explain('1.2.3 || >4 <3')
+  t.equal(eqConflict.version.version, '1.2.3', 'still finds a satisfiable branch')
+  t.end()
+})
+
+test('minVersion caches per range+options and exposes hits', (t) => {
+  const minVersionCached = require('../../ranges/min-version')
+  const { hits, misses } = minVersionCached.stats
+  minVersionCached('~2.5.1')
+  t.equal(minVersionCached.stats.misses, misses + 1, 'first call is a miss')
+  minVersionCached('~2.5.1')
+  t.equal(minVersionCached.stats.hits, hits + 1, 'repeat call is a hit')
+  t.equal(minVersionCached.stats.misses, misses + 1, 'no extra miss')
+
+  // different options must not share cache entries
+  const a = minVersionCached('~1.2', { includePrerelease: true })
+  const b = minVersionCached('~1.2')
+  t.equal(a.version, '1.2.0-0')
+  t.equal(b.version, '1.2.0')
+  t.end()
+})

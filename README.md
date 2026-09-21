@@ -530,6 +530,30 @@ strings that they parse.
   generated range, then that is returned.
 * `subset(subRange, superRange)`: Return `true` if the `subRange` range is
   entirely contained by the `superRange` range.
+* `normalize(range, options)`: Return a canonical string form of the
+  range. Equivalent spellings (unions, hyphen ranges, x-ranges, tildes,
+  and carets) normalize to the same output, build metadata is ignored,
+  and invalid input returns `null` rather than throwing. Normalizing is
+  idempotent: `normalize(normalize(r)) === normalize(r)`.
+* `intersection(r1, r2, ..., options)`: Return a `Range` covering exactly
+  the versions allowed by every supplied range, or `null` if the
+  intersection is empty. Accepts any number of ranges; the order of the
+  inputs does not affect the result, intersecting a range with itself
+  returns the same range, and the result only ever narrows. The result
+  is canonical, so `normalize(intersection(...))` is a fixed point.
+  Prereleases follow the same gating rule as `satisfies()` and
+  `subset()`: a prerelease is only allowed when every side explicitly
+  admits its `[major, minor, patch]` tuple.
+
+`minVersion` also exposes:
+
+* `minVersion.explain(range, options)`: Return
+  `{ version, blockers }`. When no version can satisfy the range,
+  `blockers` identifies the comparators that cut off every candidate
+  and the `[major, minor, patch]` tuple at which they block.
+* `minVersion.cache` / `minVersion.stats`: Results are cached per
+  range+options pair (different options never share entries), and
+  `stats.hits` / `stats.misses` report cache activity.
 
 Note that, since ranges may be non-contiguous, a version might not be
 greater than a range, less than a range, *or* satisfy a range!  For
@@ -667,14 +691,15 @@ The following modules are available:
 * `require('semver/functions/truncate')`
 * `require('semver/functions/valid')`
 * `require('semver/ranges/gtr')`
+* `require('semver/ranges/intersection')`
 * `require('semver/ranges/intersects')`
 * `require('semver/ranges/ltr')`
 * `require('semver/ranges/max-satisfying')`
 * `require('semver/ranges/min-satisfying')`
 * `require('semver/ranges/min-version')`
+* `require('semver/ranges/normalize')`
 * `require('semver/ranges/outside')`
 * `require('semver/ranges/simplify')`
 * `require('semver/ranges/subset')`
 * `require('semver/ranges/to-comparators')`
 * `require('semver/ranges/valid')`
-
