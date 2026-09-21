@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@npmcli/eslint-config": "^7.0.0",
-    "@npmcli/template-oss": "5.0.0",
+    "@npmcli/template-oss": "5.1.1",
     "benchmark": "^2.1.4",
     "tap": "^16.0.0"
   },
