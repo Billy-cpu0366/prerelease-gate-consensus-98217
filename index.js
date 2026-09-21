@@ -43,6 +43,7 @@ const ltr = require('./ranges/ltr')
 const intersects = require('./ranges/intersects')
 const simplifyRange = require('./ranges/simplify')
 const subset = require('./ranges/subset')
+const negotiate = require('./ranges/negotiate')
 module.exports = {
   parse,
   valid,
@@ -82,6 +83,7 @@ module.exports = {
   intersects,
   simplifyRange,
   subset,
+  negotiate,
   SemVer,
   re: internalRe.re,
   src: internalRe.src,
